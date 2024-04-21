@@ -41,7 +41,7 @@ def generate_launch_description():
             'instance_id': instance_id['instance_id'],
             'xpos': xpos['xpos'],
             'ypos': ypos['ypos'],
-            'zpos': '0.0'
+            'zpos': zpos['zpos']
         }.items()
     )
 
@@ -108,12 +108,20 @@ def generate_launch_description():
                    '/d435/image@sensor_msgs/msg/Image[ignition.msgs.Image',
                    '/d435/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked',
                    '/d435/camera_info@sensor_msgs/msg/CameraInfo[ignition.msgs.CameraInfo',
+                   '/gimbal/cmd_yaw@std_msgs/msg/Float64]ignition.msgs.Double',
+                   '/clock@rosgraph_msgs/msg/Clock[ignition.msgs.Clock',
+                   '/scan@sensor_msgs/msg/LaserScan[ignition.msgs.LaserScan',
+                   '/scan/points@sensor_msgs/msg/PointCloud2[ignition.msgs.PointCloudPacked',
+                   '/gimbal/cmd_roll@std_msgs/msg/Float64]ignition.msgs.Double',
+                   '/gimbal/cmd_pitch@std_msgs/msg/Float64]ignition.msgs.Double',
+                   '/imu_gimbal@sensor_msgs/msg/Imu[ignition.msgs.IMU',
                    '--ros-args', '-r', '/d435/depth_image:='+ns+'/depth_image',
                    '-r', '/d435/image:='+ns+'/image',
                    '-r', '/d435/points:='+ns+'/points',
                    '-r', '/d435/camera_info:='+ns+'/camera_info'
                    ],
     )
+
 
     # Kalman filter
     file_name = 'kf_param.yaml'
@@ -239,7 +247,12 @@ def generate_launch_description():
         name='sim_rviz2',
         arguments=['-d' + os.path.join(get_package_share_directory('d2dtracker_sim'), 'sim.rviz')]
     )
-
+    gimbal_node = Node(
+        package='d2dtracker_drone_detector',
+        executable='gimbal_stabilizer',
+        name='gimbal_stabilizer',
+        output='screen',
+         )
     ld.add_action(gz_launch)
     ld.add_action(map2pose_tf_node)
     ld.add_action(cam_tf_node)
@@ -253,5 +266,5 @@ def generate_launch_description():
     ld.add_action(geometric_controller_launch)
     ld.add_action(geometric_to_mavros_launch)
     # ld.add_action(interceptor_offboard_control_node)
-
+    ld.add_action(gimbal_node)
     return ld
